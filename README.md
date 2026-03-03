@@ -48,8 +48,7 @@ A complete inventory management system built with FastAPI and SQLAlchemy.
    pip install -r requirements.txt
    \`\`\`
 
-
-# Edit .env with your database credentials
+4. Edit .env with your credentials
 
 \`\`\`
 
