@@ -1,0 +1,411 @@
+---
+id: 48f5bb8e-7f2e-46ca-b739-4d0bfc01f266
+---
+erDiagram
+    organizations ||--o{ users : "employs"
+    organizations ||--o{ warehouses : "owns"
+    organizations ||--o{ vendors : "works with"
+    organizations ||--o{ customers : "serves"
+    
+    users ||--o{ products : "creates"
+    users ||--|| roles : "has"
+    users ||--o{ purchase_orders : "creates"
+    users ||--o{ sales_orders : "creates"
+    
+    categories ||--o{ categories : "parent of"
+    categories ||--o{ products : "contains"
+    
+    products ||--o{ inventory_stock : "stored in"
+    products ||--o{ purchase_order_items : "ordered in"
+    products ||--o{ sales_order_items : "sold in"
+    products ||--o{ stock_transfer_items : "transferred in"
+    products ||--o{ product_variants : "has variants"
+    
+    warehouses ||--o{ inventory_stock : "stores"
+    warehouses ||--o{ warehouse_zones : "divided into"
+    warehouses ||--o{ purchase_orders : "receives at"
+    warehouses ||--o{ sales_orders : "ships from"
+    warehouses ||--o{ stock_transfers : "transfers from/to"
+    
+    warehouse_zones ||--o{ bin_locations : "contains"
+    bin_locations ||--o{ inventory_stock : "holds"
+    
+    vendors ||--o{ purchase_orders : "supplies"
+    customers ||--o{ sales_orders : "places"
+    
+    purchase_orders ||--o{ purchase_order_items : "contains"
+    purchase_orders ||--o{ goods_received_notes : "received via"
+    goods_received_notes ||--o{ grn_items : "contains"
+    
+    sales_orders ||--o{ sales_order_items : "contains"
+    sales_orders ||--o{ shipments : "fulfilled by"
+    shipments ||--o{ shipment_items : "contains"
+    
+    stock_transfers ||--o{ stock_transfer_items : "contains"
+    stock_adjustments ||--o{ stock_adjustment_items : "contains"
+    
+    inventory_stock ||--o{ stock_movements : "tracked by"
+    
+    users ||--o{ audit_logs : "generates"
+
+    organizations {
+        int id PK
+        string name
+        string address
+        string phone
+        string email
+        string tax_id
+        timestamp created_at
+    }
+    
+    users {
+        int id PK
+        int organization_id FK
+        int role_id FK
+        string email UK
+        string username UK
+        string password_hash
+        string first_name
+        string last_name
+        boolean is_active
+        timestamp last_login
+        timestamp created_at
+    }
+    
+    roles {
+        int id PK
+        string name
+        string description
+        timestamp created_at
+    }
+    
+    categories {
+        int id PK
+        string name
+        string description
+        int parent_category_id FK
+        boolean is_active
+        timestamp created_at
+    }
+    
+    products {
+        int id PK
+        string sku UK
+        string barcode UK
+        string name
+        text description
+        int category_id FK
+        string unit_of_measure
+        decimal cost_price
+        decimal selling_price
+        int reorder_level
+        int reorder_quantity
+        boolean is_active
+        boolean is_serialized
+        boolean is_batch_tracked
+        string image_url
+        int created_by FK
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    product_variants {
+        int id PK
+        int product_id FK
+        string variant_name
+        string sku UK
+        string barcode UK
+        decimal additional_cost
+        boolean is_active
+        timestamp created_at
+    }
+    
+    warehouses {
+        int id PK
+        int organization_id FK
+        string name
+        string code UK
+        string address
+        string city
+        string state
+        string country
+        string postal_code
+        int manager_id FK
+        boolean is_active
+        timestamp created_at
+    }
+    
+    warehouse_zones {
+        int id PK
+        int warehouse_id FK
+        string zone_name
+        string zone_code
+        text description
+        timestamp created_at
+    }
+    
+    bin_locations {
+        int id PK
+        int zone_id FK
+        string aisle
+        string rack
+        string shelf
+        string bin
+        string bin_code UK
+        int capacity
+        boolean is_available
+        timestamp created_at
+    }
+    
+    inventory_stock {
+        int id PK
+        int product_id FK
+        int warehouse_id FK
+        int bin_location_id FK
+        int quantity_on_hand
+        int quantity_reserved
+        int quantity_available "computed"
+        int quantity_in_transit
+        string batch_number
+        string serial_number
+        date manufacture_date
+        date expiry_date
+        timestamp last_counted_at
+        timestamp updated_at
+    }
+    
+    stock_movements {
+        int id PK
+        int product_id FK
+        int warehouse_id FK
+        int bin_location_id FK
+        string movement_type
+        int quantity
+        string reference_type
+        int reference_id
+        string batch_number
+        string serial_number
+        decimal unit_cost
+        text notes
+        int created_by FK
+        timestamp movement_date
+        timestamp created_at
+    }
+    
+    vendors {
+        int id PK
+        int organization_id FK
+        string vendor_code UK
+        string name
+        string contact_name
+        string email
+        string phone
+        string address
+        string payment_terms
+        string tax_id
+        string currency
+        decimal credit_limit
+        boolean is_active
+        timestamp created_at
+    }
+    
+    customers {
+        int id PK
+        int organization_id FK
+        string customer_code UK
+        string name
+        string contact_name
+        string email
+        string phone
+        string billing_address
+        string shipping_address
+        string payment_terms
+        decimal credit_limit
+        decimal outstanding_balance
+        boolean is_active
+        timestamp created_at
+    }
+    
+    purchase_orders {
+        int id PK
+        string po_number UK
+        int vendor_id FK
+        int warehouse_id FK
+        date order_date
+        date expected_delivery_date
+        date actual_delivery_date
+        string status
+        string payment_status
+        decimal subtotal
+        decimal tax_amount
+        decimal shipping_cost
+        decimal total_amount
+        string currency
+        text notes
+        int created_by FK
+        int approved_by FK
+        timestamp created_at
+    }
+    
+    purchase_order_items {
+        int id PK
+        int purchase_order_id FK
+        int product_id FK
+        int line_number
+        int quantity_ordered
+        int quantity_received
+        decimal unit_price
+        decimal tax_rate
+        decimal line_total
+        timestamp created_at
+    }
+    
+    goods_received_notes {
+        int id PK
+        string grn_number UK
+        int purchase_order_id FK
+        int warehouse_id FK
+        date received_date
+        int received_by FK
+        string status
+        text notes
+        timestamp created_at
+    }
+    
+    grn_items {
+        int id PK
+        int grn_id FK
+        int product_id FK
+        int po_item_id FK
+        int quantity_received
+        string batch_number
+        string serial_number
+        date manufacture_date
+        date expiry_date
+        string condition
+        timestamp created_at
+    }
+    
+    sales_orders {
+        int id PK
+        string so_number UK
+        int customer_id FK
+        int warehouse_id FK
+        date order_date
+        date expected_delivery_date
+        date actual_delivery_date
+        string status
+        string payment_status
+        string priority
+        decimal subtotal
+        decimal tax_amount
+        decimal shipping_cost
+        decimal total_amount
+        string currency
+        text notes
+        int created_by FK
+        int approved_by FK
+        timestamp created_at
+    }
+    
+    sales_order_items {
+        int id PK
+        int sales_order_id FK
+        int product_id FK
+        int line_number
+        int quantity_ordered
+        int quantity_shipped
+        decimal unit_price
+        decimal tax_rate
+        decimal line_total
+        timestamp created_at
+    }
+    
+    shipments {
+        int id PK
+        string shipment_number UK
+        int sales_order_id FK
+        int warehouse_id FK
+        date shipment_date
+        string carrier
+        string tracking_number
+        decimal shipping_cost
+        string status
+        int packed_by FK
+        timestamp created_at
+    }
+    
+    shipment_items {
+        int id PK
+        int shipment_id FK
+        int product_id FK
+        int so_item_id FK
+        int quantity_shipped
+        string batch_number
+        string serial_number
+        timestamp created_at
+    }
+    
+    stock_transfers {
+        int id PK
+        string transfer_number UK
+        int from_warehouse_id FK
+        int to_warehouse_id FK
+        date transfer_date
+        date expected_date
+        string status
+        string tracking_number
+        int requested_by FK
+        int approved_by FK
+        int received_by FK
+        timestamp created_at
+    }
+    
+    stock_transfer_items {
+        int id PK
+        int stock_transfer_id FK
+        int product_id FK
+        int quantity_requested
+        int quantity_sent
+        int quantity_received
+        string batch_number
+        timestamp created_at
+    }
+    
+    stock_adjustments {
+        int id PK
+        string adjustment_number UK
+        int warehouse_id FK
+        date adjustment_date
+        string reason
+        string status
+        text notes
+        int created_by FK
+        int approved_by FK
+        timestamp created_at
+    }
+    
+    stock_adjustment_items {
+        int id PK
+        int stock_adjustment_id FK
+        int product_id FK
+        int quantity_before
+        int quantity_counted
+        int quantity_adjusted
+        int quantity_after
+        string batch_number
+        decimal unit_cost
+        timestamp created_at
+    }
+    
+    audit_logs {
+        int id PK
+        int user_id FK
+        string action
+        string entity_type
+        int entity_id
+        json old_values
+        json new_values
+        string ip_address
+        timestamp created_at
+    }
