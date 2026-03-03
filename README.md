@@ -1,5 +1,3 @@
-cat > README.md << 'EOF'
-
 # Inventory Management System
 
 A complete inventory management system built with FastAPI and SQLAlchemy.
@@ -50,9 +48,6 @@ A complete inventory management system built with FastAPI and SQLAlchemy.
    pip install -r requirements.txt
    \`\`\`
 
-4. Configure environment
-   \`\`\`bash
-   cp .env.example .env
 
 # Edit .env with your database credentials
 
